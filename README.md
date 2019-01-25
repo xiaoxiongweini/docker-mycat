@@ -303,7 +303,16 @@ Query OK, 0 rows affected, 2 warnings (0.03 sec)
 mysql> start slave;
 Query OK, 0 rows affected (0.00 sec)
 ```
+解除表锁定
+
+```shell
+mysql>  unlock tables;
+```
+
+
+
 ### mysql主从配置完成 现在测试一下
+
 登陆主数据库 创建masterdb数据库 (这个数据库名在稍后的mycat里面会用到)
 ```shell
 % mysql -uroot -pm1test -hm1
@@ -350,7 +359,20 @@ MySQL [(none)]> show databases;
         </dataHost>  
 </mycat:schema>               
 ```
-server.xml 配置文件 
+server.xml 配置文件  
+
+修改   
+
+```shell
+<property name="useOffHeapForMerge">1</property>
+```
+
+修改后为, 否则无法启动
+
+```shell
+<property name="useOffHeapForMerge">0</property>
+```
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- - - Licensed under the Apache License, Version 2.0 (the "License");
@@ -440,8 +462,19 @@ server.xml 配置文件
 ```
 ### 启动mycat
 ```shell
+//废弃原作者compose方式启动, 本地不知什么原因不行
 % cd ~/docker-mycat/compose
 % sudo docker-compose up -d mycat
+//用一下方式启动
+
+docker run --name mycat \
+--restart=on-failure:3 \
+--privileged=true \
+-v /whome/docker-mycat/config/mycat:/mycat/conf  \
+-v /whome/docker-mycat/log/mycat-logs:/mycat/logs \
+-p 53300:8066 -p 53310:9066  \
+-d compose_mycat
+
 ```
 
 ### 整体测试
